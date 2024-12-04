@@ -1,2 +1,35 @@
 
 .env
+__pycache__/file_organizer.cpython-312.pyc
+config.json
+build/file_organizer/base_library.zip
+dist/AI File Organizer.exe
+build/file_organizer/Analysis-00.toc
+build/file_organizer/PYZ-00.pyz
+build/file_organizer/PYZ-00.toc
+build/file_organizer/warn-file_organizer.txt
+build/file_organizer/xref-file_organizer.html
+build/file_organizer/localpycs/pyimod01_archive.pyc
+build/file_organizer/localpycs/pyimod02_importers.pyc
+build/file_organizer/localpycs/pyimod03_ctypes.pyc
+build/file_organizer/localpycs/pyimod04_pywin32.pyc
+build/file_organizer/localpycs/struct.pyc
+build/file_organizer/AI File Organizer.pkg
+build/file_organizer/EXE-00.toc
+build/file_organizer/PKG-00.toc
+dist/AI_File_Organizer.exe
+build/AI_File_Organizer/base_library.zip
+AI_File_Organizer.spec
+build/AI_File_Organizer/AI_File_Organizer.pkg
+build/AI_File_Organizer/Analysis-00.toc
+build/AI_File_Organizer/EXE-00.toc
+build/AI_File_Organizer/PKG-00.toc
+build/AI_File_Organizer/PYZ-00.pyz
+build/AI_File_Organizer/PYZ-00.toc
+build/AI_File_Organizer/warn-AI_File_Organizer.txt
+build/AI_File_Organizer/xref-AI_File_Organizer.html
+build/AI_File_Organizer/localpycs/pyimod01_archive.pyc
+build/AI_File_Organizer/localpycs/pyimod02_importers.pyc
+build/AI_File_Organizer/localpycs/pyimod03_ctypes.pyc
+build/AI_File_Organizer/localpycs/pyimod04_pywin32.pyc
+build/AI_File_Organizer/localpycs/struct.pyc

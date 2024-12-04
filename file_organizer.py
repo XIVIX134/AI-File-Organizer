@@ -14,14 +14,6 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# API Configuration
-API_KEY = os.getenv('API_KEY')
-ENDPOINT = os.getenv('ENDPOINT')
-MODEL_NAME = os.getenv('MODEL_NAME')
-
-if not all([API_KEY, ENDPOINT, MODEL_NAME]):
-    raise ValueError("API_KEY, ENDPOINT, and MODEL_NAME must be set in .env file")
-
 class FileScanner:
     def __init__(self, base_path: Path):
         self.base_path = base_path
@@ -31,7 +23,8 @@ class FileScanner:
             'document': ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt', '.xlsx', '.pptx'],
             'shortcut': ['.lnk', '.url'],
             'audio': ['.mp3', '.wav', '.ogg', '.m4a', '.flac'],
-            'archive': ['.zip', '.rar', '.7z', '.tar', '.gz']
+            'archive': ['.zip', '.rar', '.7z', '.tar', '.gz'],
+            'application': ['.exe', '.msi', '.app', '.dmg', '.pkg']  # Added application types
         }
 
     def get_file_category(self, file_path: Path) -> str:
@@ -69,12 +62,12 @@ class FileScanner:
         return files_data
 
 class AIOrganizer:
-    def __init__(self, model: str = MODEL_NAME):
+    def __init__(self, model: str = None):
         self.client = OpenAI(
-            api_key=API_KEY,
-            base_url=ENDPOINT
+            api_key=os.getenv('API_KEY'),
+            base_url=os.getenv('ENDPOINT')
         )
-        self.model = model
+        self.model = model or os.getenv('MODEL_NAME')
         self.max_chunk_size = 1000000  # 1MB chunks for processing
 
     def clean_response(self, response: str) -> str:
@@ -333,26 +326,74 @@ class FileOrganizer:
             logger.error(f"File movement error: {str(e)}")
             return False
 
+    def remove_empty_folders(self, path: Path) -> None:
+        """Recursively remove empty folders from deepest level up"""
+        try:
+            # Get all subfolders
+            folders = [x for x in Path(path).glob('**/*') if x.is_dir()]
+            
+            # Sort by depth (deepest first)
+            folders.sort(key=lambda x: len(x.parts), reverse=True)
+            
+            # Try to remove each folder
+            for folder in folders:
+                try:
+                    if folder.exists() and not any(folder.iterdir()):
+                        folder.rmdir()
+                        logger.info(f"Removed empty folder: {folder}")
+                except Exception as e:
+                    logger.warning(f"Could not remove folder {folder}: {e}")
+            
+            # Finally try to remove the root folder if it's empty
+            try:
+                if path.exists() and not any(path.iterdir()):
+                    path.rmdir()
+                    logger.info(f"Removed empty root folder: {path}")
+            except Exception as e:
+                logger.warning(f"Could not remove root folder {path}: {e}")
+                
+        except Exception as e:
+            logger.error(f"Error in remove_empty_folders: {str(e)}")
+
+    def get_created_folders(self, moves: list) -> set:
+        """Get all folders that were created during the moves"""
+        folders = set()
+        for move in moves:
+            path = Path(move['to'])
+            while path != self.base_path:
+                folders.add(path.parent)
+                path = path.parent
+        return folders
+
     def undo_last_move(self) -> bool:
-        """Undo the last batch of file movements"""
+        """Undo the last batch of file movements and clean up empty folders"""
         try:
             if not self.move_history:
                 logger.info("No moves to undo")
                 return False
 
             last_moves = self.move_history.pop()
+            
+            # Get all folders that were created
+            created_folders = self.get_created_folders(last_moves)
+            
+            # First move all files back
             for move in reversed(last_moves):
                 old_path = Path(move['to'])
                 new_path = Path(move['from'])
                 
                 if old_path.exists():
-                    # Create parent directories if they don't exist
-                    new_path.parent.mkdir(exist_ok=True, parents=True)
+                    # Ensure parent directory exists
+                    new_path.parent.mkdir(parents=True, exist_ok=True)
                     shutil.move(str(old_path), str(new_path))
                     logger.info(f"Undid move: {old_path} back to {new_path}")
                 else:
                     logger.error(f"Cannot undo - file not found: {old_path}")
                     return False
+            
+            # Clean up each created folder
+            for folder in sorted(created_folders, key=lambda x: len(str(x)), reverse=True):
+                self.remove_empty_folders(folder)
 
             return True
             
