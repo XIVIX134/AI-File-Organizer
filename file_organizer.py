@@ -204,7 +204,8 @@ class AIOrganizer:
                         "content": prompt
                     }
                 ],
-                temperature=0.2
+                temperature=0.2,
+                max_completion_tokens=4096
             )
 
             result = response.choices[0].message.content
@@ -254,7 +255,8 @@ Important instructions:
                         "content": prompt
                     }
                 ],
-                temperature=0.7  # Increased temperature for more variation
+                temperature=0.7,  # Increased temperature for more variation
+                max_completion_tokens=4096
             )
 
             result = response.choices[0].message.content

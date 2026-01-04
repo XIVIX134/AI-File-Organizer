@@ -514,7 +514,7 @@ class FileOrganizerGUI:
                     {"role": "user", "content": "Say hello"}
                 ],
                 'model': model_name,
-                'max_tokens': 20,
+                'max_completion_tokens': 20,
                 'temperature': 0.7
             }
             
